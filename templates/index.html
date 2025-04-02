@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Contribution Dashboard</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            font-size: 1.8em;
+            margin-top: 40px;
+            padding-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        tr:hover {
+            background: #ecf0f1;
+        }
+        .error {
+            color: #e74c3c;
+            font-style: italic;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #e67e22;
+        }
+        /* Special effects for Overall Stats */
+        .overall-section h2 {
+            color: #d35400;
+            border-bottom: 3px solid #e67e22;
+            animation: glow 2s infinite alternate;
+        }
+        .overall-section table {
+            border: 2px solid #e67e22;
+            background: #fff3e6;
+        }
+        .overall-section th {
+            background: #e67e22;
+        }
+        /* Regular repo styling */
+        .repo-section h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #3498db;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #fff, 0 0 10px #e67e22; }
+            to { text-shadow: 0 0 10px #fff, 0 0 20px #e67e22; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Git Contribution Dashboard</h1>
+
+    <!-- Overall Stats with special effects -->
+    <div class="overall-section">
+        <h2>🔥 Overall Stats (All Repos Combined) 🔥</h2>
+        <table>
+            <tr>
+                <th>Time Period</th>
+                <th>Commits</th>
+                <th>Lines Added</th>
+                <th>Lines Removed</th>
+                <th>Total Changes</th>
+            </tr>
+            {% for range_name, data in overall_stats.items() %}
+                <tr>
+                    <td>{{ range_name }}</td>
+                    <td class="highlight">{{ data.commits }}</td>
+                    <td>{{ data.insertions }} ➕</td>
+                    <td>{{ data.deletions }} ➖</td>
+                    <td>{{ data.total_changes }} ✨</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Individual Repo Stats -->
+    {% for repo, ranges in stats.items() %}
+        <div class="repo-section">
+            <h2>📦 Repository: {{ repo }}</h2>
+            <table>
+                <tr>
+                    <th>Time Period</th>
+                    <th>Commits</th>
+                    <th>Lines Added</th>
+                    <th>Lines Removed</th>
+                    <th>Total Changes</th>
+                </tr>
+                {% for range_name, data in ranges.items() %}
+                    <tr>
+                        <td>{{ range_name }}</td>
+                        {% if data.error %}
+                            <td colspan="4" class="error">{{ data.error }}</td>
+                        {% else %}
+                            <td class="highlight">{{ data.commits }}</td>
+                            <td>{{ data.insertions }} ➕</td>
+                            <td>{{ data.deletions }} ➖</td>
+                            <td>{{ data.total_changes }} 🌟</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endfor %}
+</body>
+</html>
