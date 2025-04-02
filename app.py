@@ -10,8 +10,7 @@ app = Flask(__name__)
 REPO_MAP = {
     "/home/junyao/code/CANDOR-BENCH/big-ann-stat": "Big-ANN-Benchmarks",
     "/home/junyao/code/CC-HNSW": "CC-HNSW",
-    "/home/junyao/code/CANDOR-BENCH/CANDY-Benchmark": "CANDOR-Bench",
-    "/home/junyao/code/CANDOR-BENCH/CC-DiskANN": "CC-DiskANN-Bench"
+    "/home/junyao/code/CANDOR-BENCH/CANDY-Benchmark": "CANDOR-Bench"
 }
 TARGET_REPOS = list(REPO_MAP.keys())
 
@@ -22,8 +21,10 @@ TIME_RANGES = {
     "1 Year": lambda: datetime.utcnow() - timedelta(days=365),
 }
 
+# Global variables to store stats and last updated time
 stats_data = {}
 overall_stats_data = {}
+last_updated = None
 
 def get_git_stats(repo_path, since=None):
     try:
@@ -63,7 +64,7 @@ def get_git_stats(repo_path, since=None):
         os.chdir(os.path.expanduser("~"))
 
 def update_stats():
-    global stats_data, overall_stats_data
+    global stats_data, overall_stats_data, last_updated
     while True:
         stats = {}
         overall_stats = {
@@ -86,14 +87,16 @@ def update_stats():
                 for key in ["commits", "insertions", "deletions", "total_changes"]:
                     overall_stats[range_name][key] += range_stats[key]
 
+        # Update global data and timestamp
         stats_data = stats
         overall_stats_data = overall_stats
-        print(f"📊 Stats updated at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        time.sleep(300)
+        last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(f"📊 Stats updated at {last_updated}")
+        time.sleep(3600)
 
 @app.route("/")
 def index():
-    return render_template("index.html", stats=stats_data, overall_stats=overall_stats_data)
+    return render_template("index.html", stats=stats_data, overall_stats=overall_stats_data, last_updated=last_updated)
 
 threading.Thread(target=update_stats, daemon=True).start()
 

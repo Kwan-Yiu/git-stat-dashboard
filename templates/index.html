@@ -18,8 +18,14 @@
             text-align: center;
             color: #2c3e50;
             font-size: 2.5em;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .last-updated {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 30px;
         }
         h2 {
             font-size: 1.8em;
@@ -59,7 +65,6 @@
             font-weight: bold;
             color: #e67e22;
         }
-        /* Special effects for Overall Stats */
         .overall-section h2 {
             color: #d35400;
             border-bottom: 3px solid #e67e22;
@@ -72,7 +77,6 @@
         .overall-section th {
             background: #e67e22;
         }
-        /* Regular repo styling */
         .repo-section h2 {
             color: #2980b9;
             border-bottom: 2px solid #3498db;
@@ -85,8 +89,8 @@
 </head>
 <body>
     <h1>Git Contribution Dashboard</h1>
+    <div class="last-updated">⏰ Last Updated: {{ last_updated or 'Waiting for first update...' }}</div>
 
-    <!-- Overall Stats with special effects -->
     <div class="overall-section">
         <h2>🔥 Overall Stats (All Repos Combined) 🔥</h2>
         <table>
@@ -109,7 +113,6 @@
         </table>
     </div>
 
-    <!-- Individual Repo Stats -->
     {% for repo, ranges in stats.items() %}
         <div class="repo-section">
             <h2>📦 Repository: {{ repo }}</h2>
