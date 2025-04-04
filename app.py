@@ -8,9 +8,11 @@ import time
 app = Flask(__name__)
 
 REPO_MAP = {
-    "/home/junyao/code/CANDOR-BENCH/big-ann-stat": "Big-ANN-Benchmarks",
-    "/home/junyao/code/CC-HNSW": "CC-HNSW",
-    "/home/junyao/code/CANDOR-BENCH/CANDY-Benchmark": "CANDOR-Bench"
+    "/app/code/big-ann-stat": "Big-ANN-Benchmarks",
+    "/app/code/CC-HNSW": "CC-HNSW",
+    "/app/code/CANDY-Benchmark": "CANDOR-Bench",
+    "/app/code/Parlay-HNSW": "Parlay-HNSW"
+    "/app/code/stagewise-gt-tools": "GT-Tools"
 }
 TARGET_REPOS = list(REPO_MAP.keys())
 
@@ -26,12 +28,15 @@ stats_data = {}
 overall_stats_data = {}
 last_updated = None
 
-def get_git_stats(repo_path, since=None):
+def get_git_stats(repo_path, since=None, file_path=None):
     try:
         os.chdir(repo_path)
         cmd = ['git', 'log', '--author=1071307515@qq.com', '--pretty=tformat:%H', '--numstat']
         if since:
             cmd.append(f'--since={since.strftime("%Y-%m-%d %H:%M:%S")}')
+        if file_path:  # 如果指定了文件，只统计该文件
+            cmd.append('--')
+            cmd.append(file_path)
         
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         
@@ -82,7 +87,9 @@ def update_stats():
             
             stats[display_name] = {}
             for range_name, since_func in TIME_RANGES.items():
-                range_stats = get_git_stats(repo, since_func())
+                # 只对 Parlay-HNSW 统计 algorithms/bench/benchmark.C，其他统计所有文件
+                file_path = "algorithms/bench/benchmark.C" if repo == "/app/code/Parlay-HNSW" else None
+                range_stats = get_git_stats(repo, since_func(), file_path=file_path)
                 stats[display_name][range_name] = range_stats
                 for key in ["commits", "insertions", "deletions", "total_changes"]:
                     overall_stats[range_name][key] += range_stats[key]
@@ -92,12 +99,13 @@ def update_stats():
         overall_stats_data = overall_stats
         last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print(f"📊 Stats updated at {last_updated}")
-        time.sleep(3600)
+        time.sleep(3600)  # Update every hour
 
 @app.route("/")
 def index():
     return render_template("index.html", stats=stats_data, overall_stats=overall_stats_data, last_updated=last_updated)
 
+# Start the stats update thread
 threading.Thread(target=update_stats, daemon=True).start()
 
 if __name__ == "__main__":
